@@ -7,19 +7,30 @@ import (
 )
 
 func main() {
-	cmdCpClip := exec.Command("pbpaste", ">&1")
-	clipTxt, err := cmdCpClip.Output()
+	// Get most recent clipboard text from source machine
+	// In this case, source machine is strictly a Mac OSX.
+	cmdEchoClip := exec.Command("pbpaste", ">&1")
+	clipTxt, err := cmdEchoClip.Output()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	remoteCmd := fmt.Sprintf("sed -i '1 i %s' $HOME/Public/clip.txt", string(clipTxt))
-	cmdNixClipWrite := exec.Command(
+	remoteMachineAddr := "nix@192.168.1.9"
+	remoteClipFilePath := "$HOME/Public/clip.txt"
+	// saving the source machine clipboard text to a file on remote machine
+	// AND copy source machine clipboard text to remote machine clipboard
+	remoteCmd := fmt.Sprintf(
+		"sed -i '1 i %s' %s; echo %s | xclip -sel clip",
+		string(clipTxt),
+		remoteClipFilePath,
+		string(clipTxt),
+	)
+	cmdSshClip := exec.Command(
 		"ssh",
-		"nix@192.168.1.9",
+		remoteMachineAddr,
 		remoteCmd,
 	)
-	err = cmdNixClipWrite.Run()
+	err = cmdSshClip.Run()
 	if err != nil {
 		log.Fatalln(err)
 	}
