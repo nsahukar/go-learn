@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 )
 
 func main() {
@@ -12,10 +13,15 @@ func main() {
 	// If does not exists, use default.
 	ipTrailBit := 9
 	if len(os.Args) > 1 {
-		ipTrailBit = int(os.Args[1])
+		fisrtArg, err := strconv.Atoi(os.Args[1])
+		if err != nil {
+			log.Fatalln("Parsing error. Expecting an integer argument...")
+			os.Exit(1)
+		}
+		ipTrailBit = fisrtArg
 	}
 	remoteMachineAddr := fmt.Sprintf("nix@192.168.1.%d", ipTrailBit)
-	fmt.Fprintln("SSHing to %s ...", remoteMachineAddr)
+	fmt.Printf("SSHing to %s...\n", remoteMachineAddr)
 
 	// Get most recent clipboard text from source machine
 	// In this case, source machine is strictly a Mac OSX.
