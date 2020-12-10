@@ -16,21 +16,21 @@ func main() {
 	}
 
 	remoteMachineAddr := "nix@192.168.1.9"
-	remoteClipFilePath := "$HOME/Public/clip.txt"
+	remoteClipFilePath := "/home/nix/Public/clip.txt"
 	// saving the source machine clipboard text to a file on remote machine
 	// AND copy source machine clipboard text to remote machine clipboard
 	remoteCmd := fmt.Sprintf(
-		"sed -i '1 i %s' %s; echo %s | xclip -sel clip",
+		"sed -i '1 i %s' %s && echo '%s' | tr -d '\n' | DISPLAY=:0 xsel -ib",
 		string(clipTxt),
 		remoteClipFilePath,
 		string(clipTxt),
 	)
-	cmdSshClip := exec.Command(
+	cmdSSHClip := exec.Command(
 		"ssh",
 		remoteMachineAddr,
 		remoteCmd,
 	)
-	err = cmdSshClip.Run()
+	err = cmdSSHClip.Run()
 	if err != nil {
 		log.Fatalln(err)
 	}
