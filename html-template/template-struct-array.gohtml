@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<body>
+		<ul>
+			{{range .}}
+			<li>
+				<h3>{{.Username}}</h3>
+				<p>{{.Name}}</p>
+				<p>{{.Email}}</p>
+				<p>{{.Phone}}</p>
+			</li>
+			{{end}}
+		</ul>
+	</body>
+</head>

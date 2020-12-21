@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<body>
+		<ul>
+			{{range $index, $value := .}}
+			<li>{{$index}} - {{$value}}</li>
+			{{end}}
+		</ul>
+	</body>
+</head>
