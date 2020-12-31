@@ -16,9 +16,15 @@ type user struct {
 	Phone    string
 }
 
+// function to get the user nickname
+func nickname(name string) string {
+	return strings.TrimSpace(name)[:3]
+}
+
 // create a template.FuncMap to register functions.
 var fm = template.FuncMap{
-	"uc": strings.ToUpper,
+	"uc":   strings.ToUpper,
+	"nick": nickname,
 }
 
 func init() {
