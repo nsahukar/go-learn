@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"strings"
 	"text/template"
 )
 
@@ -15,8 +16,13 @@ type user struct {
 	Phone    string
 }
 
+// create a template.FuncMap to register functions.
+var fm = template.FuncMap{
+	"uc": strings.ToUpper,
+}
+
 func init() {
-	tmpl = template.Must(template.ParseFiles(
+	tmpl = template.Must(template.New("").Funcs(fm).ParseFiles(
 		"template-white.gohtml",
 		"template-variables.gohtml",
 		"template-array.gohtml",
