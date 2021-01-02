@@ -29,9 +29,6 @@ func handle(conn net.Conn) {
 
 	// read request
 	request(conn)
-
-	// write response
-	response(conn)
 }
 
 func request(conn net.Conn) {
@@ -46,28 +43,97 @@ func request(conn net.Conn) {
 		}
 		if i == 0 {
 			// request line
-			method := strings.Fields(line)[0]
-			fmt.Println("METHOD: ", method)
+			reqLineComponents := strings.Fields(line)
+			if len(reqLineComponents) == 3 {
+				method := reqLineComponents[0]
+				uri := reqLineComponents[1]
+				mux(conn, method, uri)
+			} else {
+				break
+			}
 		}
 		i++
 	}
 }
 
-func response(conn net.Conn) {
-	body := `<!DOCTYPE html>
+func mux(conn net.Conn, method string, uri string) {
+	statusCode, body := response(method, uri)
+	statusLine := responseStatus(statusCode)
+	headers := responseHeaders(statusCode, len(body))
+	httpResponse := fmt.Sprintf("%s\r\n%s\r\n\n%s", statusLine, headers, body)
+	fmt.Fprint(conn, httpResponse)
+}
+
+func responseStatus(statusCode int) string {
+	var statusLine = ""
+	switch statusCode {
+	case 200:
+		statusLine = "HTTP/1.1 200 OK"
+	default:
+		statusLine = "HTTP/1.1 404 Not Found"
+	}
+	return statusLine
+}
+
+func responseHeaders(status int, contentLength int) string {
+	headers := fmt.Sprintf("Content-Length: %d\r\n", contentLength)
+	headers = fmt.Sprintf("%sContent-Type: text/html", headers)
+	return headers
+}
+
+func response(method string, uri string) (int, string) {
+	var statusCode = 200
+	var htmlBody = `<p><a href="/">Index</a></p>
+<p><a href="/about">About</a></p>
+<p><a href="/contact">Contact</a></p>
+<p><a href="/apply">Apply</a></p>`
+
+	switch method {
+	case "GET":
+		switch uri {
+		case "/":
+			htmlBody = fmt.Sprintf("<h3>INDEX</h3>\r\n%s", htmlBody)
+		case "/about":
+			htmlBody = fmt.Sprintf("<h3>ABOUT</h3>\r\n%s", htmlBody)
+		case "/contact":
+			htmlBody = fmt.Sprintf("<h3>CONTACT</h3>\r\n%s", htmlBody)
+		case "/apply":
+			htmlBody = fmt.Sprintf("<h3>APPLY</h3>\r\n%s", htmlBody)
+			applyForm := `<form method="POST" action="/apply">
+<input type="submit" value="apply">
+</form>`
+			htmlBody = fmt.Sprintf("%s\r\n%s", htmlBody, applyForm)
+		default:
+			statusCode = 404
+			htmlBody = "<h2>404 Not Found</h2>"
+		}
+
+	case "POST":
+		switch uri {
+		case "/apply":
+			htmlBody = fmt.Sprintf("<h3>APPLY PROCESS</h3>\r\n%s", htmlBody)
+		default:
+			statusCode = 404
+			htmlBody = "<h2>404 Not Found</h2>"
+		}
+
+	default:
+		statusCode = 404
+		htmlBody = "<h2>404 Not Found</h2>"
+	}
+
+	htmlStart := `<!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
-		<title>TCP Server HTTP</title>
+		<title>TCP Server HTTP MUX</title>
 	</head>
-	<body>
-		<h2>Hello, World!</h2>
-	</body>
+	<body>`
+
+	htmlEnd := `</body>
 </html>`
 
-	fmt.Fprintln(conn, "HTTP/1.1 200 OK")
-	fmt.Fprintf(conn, "Content-Length: %d\r\n", len(body))
-	fmt.Fprintln(conn, "Content-Type: text/html")
-	fmt.Fprintln(conn, "")
-	fmt.Fprint(conn, body)
+	payload := fmt.Sprintf("%s\r\n%s\r\n%s", htmlStart, htmlBody, htmlEnd)
+
+	return statusCode, payload
 }
