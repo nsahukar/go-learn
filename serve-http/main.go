@@ -1,14 +1,25 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
+	"log"
 	"net/http"
 )
 
+var tmpl *template.Template
+
 type fido int
 
+func init() {
+	tmpl = template.Must(template.ParseFiles("index.gohtml"))
+}
+
 func (f fido) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Welcome, FIDO here! Whats yo poisen?")
+	err := r.ParseForm()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	tmpl.ExecuteTemplate(w, "index.gohtml", r.Form)
 }
 
 func main() {
