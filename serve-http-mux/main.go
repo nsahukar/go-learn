@@ -6,19 +6,30 @@ import (
 )
 
 type fido int
+type hotdog int
+type hotcat int
 
 func (f fido) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	switch r.URL.Path {
-	case "/":
-		io.WriteString(w, "Hello")
-	case "/dog":
-		io.WriteString(w, "Woof!")
-	case "/cat":
-		io.WriteString(w, "Meow...")
-	}
+	io.WriteString(w, "Hello")
+}
+
+func (d hotdog) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	io.WriteString(w, "Woof!")
+}
+
+func (c hotcat) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	io.WriteString(w, "Meow...")
 }
 
 func main() {
 	var f fido
-	http.ListenAndServe(":8080", f)
+	var d hotdog
+	var c hotcat
+
+	mux := http.NewServeMux()
+	mux.Handle("/", f)
+	mux.Handle("/dog", d)
+	mux.Handle("/cat", c)
+
+	http.ListenAndServe(":8080", mux)
 }
