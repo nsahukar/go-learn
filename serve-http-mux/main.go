@@ -18,10 +18,9 @@ func cat(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", fido)
-	mux.HandleFunc("/dog", dog)
-	mux.HandleFunc("/cat", cat)
+	http.HandleFunc("/", fido)
+	http.HandleFunc("/dog", dog)
+	http.HandleFunc("/cat", cat)
 
-	http.ListenAndServe(":8080", mux)
+	http.ListenAndServe(":8080", nil)
 }
