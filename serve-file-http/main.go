@@ -19,8 +19,14 @@ func pisa(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	// using io.Copy to write file to http.ResponseWriter
-	io.Copy(w, file)
+	fileStat, err := file.Stat()
+	if err != nil {
+		http.Error(w, "File Not Found", 404)
+		return
+	}
+
+	// serving file with http.serveContent
+	http.ServeContent(w, r, fileStat.Name(), fileStat.ModTime(), file)
 }
 
 func main() {
