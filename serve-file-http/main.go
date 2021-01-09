@@ -3,7 +3,6 @@ package main
 import (
 	"io"
 	"net/http"
-	"os"
 )
 
 func solo(w http.ResponseWriter, r *http.Request) {
@@ -12,21 +11,8 @@ func solo(w http.ResponseWriter, r *http.Request) {
 }
 
 func pisa(w http.ResponseWriter, r *http.Request) {
-	file, err := os.Open("pisa.jpeg")
-	if err != nil {
-		http.Error(w, "File Not Found", 404)
-		return
-	}
-	defer file.Close()
-
-	fileStat, err := file.Stat()
-	if err != nil {
-		http.Error(w, "File Not Found", 404)
-		return
-	}
-
-	// serving file with http.serveContent
-	http.ServeContent(w, r, fileStat.Name(), fileStat.ModTime(), file)
+	// serving file with http.serveFile
+	http.ServeFile(w, r, "pisa.jpeg")
 }
 
 func main() {
