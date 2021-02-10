@@ -5,9 +5,10 @@ import (
 	"image/color"
 	"image/gif"
 	"io"
+	"log"
 	"math"
 	"math/rand"
-	"os"
+	"net/http"
 )
 
 var palette = []color.Color{color.White, color.Black}
@@ -48,6 +49,12 @@ func lissajous(out io.Writer) {
 	gif.EncodeAll(out, &anim) // NOTE: ignoring encoding errors
 }
 
+func handler(w http.ResponseWriter, r *http.Request) {
+	lissajous(w)
+}
+
 func main() {
-	lissajous(os.Stdout)
+	//lissajous(os.Stdout)
+	http.HandleFunc("/", handler)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
